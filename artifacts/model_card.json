@@ -1,0 +1,29 @@
+{
+  "model_name": "logreg_interactions_on",
+  "model_type": "logistic_regression",
+  "selection_metric": "recall_at_precision_40",
+  "precision_floor": 0.4,
+  "threshold": 0.380669721,
+  "test_metrics": {
+    "recall_at_precision_40": 0.24628450106157113,
+    "precision_at_precision_40": 0.4,
+    "predicted_positive_rate": 0.3193916349809886,
+    "roc_auc": 0.5305239432084603,
+    "pr_auc": 0.37892460304581854
+  },
+  "training_data": {
+    "rows": 7448,
+    "positive_rate": 0.3582169709989259
+  },
+  "intended_use": "Screening support, not diagnosis",
+  "limitations": [
+    "Performance depends on threshold choice",
+    "Not calibrated for absolute risk probabilities",
+    "Trained on a single dataset"
+  ],
+  "ethical_notes": [
+    "False positives may cause unnecessary concern",
+    "False negatives may miss at-risk individuals"
+  ],
+  "created_at": "2026-02-02T19:25:02.600785+00:00"
+}
