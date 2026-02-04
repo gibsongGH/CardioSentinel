@@ -1,0 +1,10 @@
+mlruns/
+outputs/
+data/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+*.egg-info/
+.env
+check_base_rate.py
