@@ -1,9 +1,21 @@
+# Python cache
 __pycache__/
+.pytest_cache/
 *.pyc
-.venv/
-.env
-mlruns/
-artifacts/
-*.egg-info/
+
+# Standard builds
 dist/
 build/
+*.egg-info/
+
+# Environments
+.venv/
+.env
+
+# Experiment outputs
+mlruns/
+outputs/
+#artifacts/
+
+# Private notes
+notes/
