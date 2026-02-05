@@ -3,6 +3,9 @@ __pycache__/
 .pytest_cache/
 *.pyc
 
+# AI tooling
+.claude/
+
 # Standard builds
 dist/
 build/
@@ -12,10 +15,12 @@ build/
 .venv/
 .env
 
-# Experiment outputs
+# Local datasets
+data/
+
+# Experiments & outputs
 mlruns/
 outputs/
-#artifacts/
 
 # Private notes
 notes/

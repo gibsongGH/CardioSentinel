@@ -25,7 +25,7 @@ from src.data.load_data import load_heart_data
 from src.eval.evaluation import (
     apply_threshold,
     compute_metrics,
-    find_threshold_at_precision,
+    #find_threshold_at_precision,
     plot_confusion_matrix,
     plot_pr_curve,
     plot_roc_curve,
@@ -151,40 +151,43 @@ def _run_single(
         y_pred_default = pipe.predict(X_test)
 
         # Standard metrics at default 0.5 threshold
-        std_metrics = compute_metrics(np.array(y_test), y_pred_default, y_proba)
+        std_metrics = compute_metrics(np.array(y_test), y_pred_default, y_proba, precision_floors=(0.30, 0.40),)
 
-        # Custom threshold at precision >= 0.30
-        threshold_30, recall_30 = find_threshold_at_precision(
-            np.array(y_test), y_proba, precision_floor=0.30
-        )
-        y_pred_30 = apply_threshold(y_proba, threshold_30)
-
-        all_metrics = {
-            **std_metrics,
-            "recall_at_precision_30": recall_30,
-            "threshold_at_precision_30": threshold_30,
-        }
+        all_metrics = std_metrics
         mlflow.log_metrics(all_metrics)
 
         # Plots
+        threshold_30 = all_metrics["threshold_at_precision_30"]
+        y_pred_30 = apply_threshold(y_proba, threshold_30)
+
+        threshold_40 = all_metrics["threshold_at_precision_40"]
+        y_pred_40 = apply_threshold(y_proba, threshold_40)
+
         figs = {
             "roc_curve": plot_roc_curve(np.array(y_test), y_proba),
             "pr_curve": plot_pr_curve(np.array(y_test), y_proba),
             "confusion_matrix_p30": plot_confusion_matrix(
-                np.array(y_test), y_pred_30,
+                np.array(y_test),
+                y_pred_30,
                 title=f"CM @ precision≥0.30 (thr={threshold_30:.3f})",
+            ),
+            "confusion_matrix_p40": plot_confusion_matrix(
+                np.array(y_test),
+                y_pred_40,
+                title=f"CM @ precision≥0.40 (thr={threshold_40:.3f})",
             ),
             "threshold_sweep": plot_threshold_sweep(np.array(y_test), y_proba),
         }
         log_plots(figs)
 
-    logger.info(
-        "%s | recall@p30=%.3f  pr_auc=%.3f  roc_auc=%.3f",
-        run_name,
-        recall_30,
-        all_metrics.get("pr_auc", 0),
-        all_metrics.get("roc_auc", 0),
-    )
+        logger.info(
+            "%s | recall@p30=%.3f  recall@p40=%.3f  pr_auc=%.3f  roc_auc=%.3f",
+            run_name,
+            all_metrics.get("recall_at_precision_30", 0),
+            all_metrics.get("recall_at_precision_40", 0),
+            all_metrics.get("pr_auc", 0),
+            all_metrics.get("roc_auc", 0),
+        )
 
     return {
         "model_family": model_type,
@@ -314,10 +317,19 @@ def main() -> None:
     # Evaluate best tuned tree on test set
     y_proba_tuned = best_pipe.predict_proba(X_test)[:, 1]
     y_pred_tuned = best_pipe.predict(X_test)
-    std_m = compute_metrics(np.array(y_test), y_pred_tuned, y_proba_tuned)
-    thr30, rec30 = find_threshold_at_precision(np.array(y_test), y_proba_tuned)
+
+    all_m = compute_metrics(
+        np.array(y_test),
+        y_pred_tuned,
+        y_proba_tuned,
+        precision_floors=(0.30, 0.40),
+    )
+
+    thr30 = all_m["threshold_at_precision_30"]
     y_pred_30 = apply_threshold(y_proba_tuned, thr30)
-    all_m = {**std_m, "recall_at_precision_30": rec30, "threshold_at_precision_30": thr30}
+
+    thr40 = all_m["threshold_at_precision_40"]
+    y_pred_40 = apply_threshold(y_proba_tuned, thr40)
 
     with mlflow.start_run(run_name=f"tree_{tree_name_t}_tuned"):
         mlflow.set_tags({"stage": "stage2", "model_type": "tree",
@@ -340,6 +352,10 @@ def main() -> None:
                 np.array(y_test), y_pred_30,
                 title=f"CM @ precision≥0.30 (thr={thr30:.3f})",
             ),
+            "confusion_matrix_p40": plot_confusion_matrix(
+                np.array(y_test), y_pred_40,
+                title=f"CM @ precision≥0.40 (thr={thr40:.3f})",
+            ),
             "threshold_sweep": plot_threshold_sweep(np.array(y_test), y_proba_tuned),
         }
         log_plots(figs)
@@ -353,8 +369,8 @@ def main() -> None:
 
     # ---- Summary --------------------------------------------------------
     OUTPUTS_DIR.mkdir(exist_ok=True)
-    summary = pd.DataFrame(results).sort_values(
-        by=["recall_at_precision_30", "pr_auc"],
+    summary = pd.DataFrame(results).fillna(np.nan).sort_values(
+        by=["recall_at_precision_40", "pr_auc"],
         ascending=[False, False],
     )
     summary_path = OUTPUTS_DIR / "runs_summary.csv"
