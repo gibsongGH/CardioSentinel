@@ -1,7 +1,7 @@
 # CardioSentinel
 
 <p align="center">
-  <img src="assets/demo.gif" width="600">
+  <img src="assets/demo.gif" width="500">
 </p>
 
 **End-to-end machine learning system for heart attack risk screening**, optimized for high recall under a fixed precision constraint and deployed as an interactive web application.
