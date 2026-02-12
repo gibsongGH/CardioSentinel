@@ -1,9 +1,13 @@
 # CardioSentinel
 
+<p align="center">
+  <img src="assets/demo.gif" width="800">
+</p>
+
 **End-to-end machine learning system for heart attack risk screening**, optimized for high recall under a fixed precision constraint and deployed as an interactive web application.
 
 🔗 **Live demo:** [cardiosentinel.onrender.com](https://cardiosentinel.onrender.com)  
-💻 **Source code:** [github.com/gibsongGH/CardioSentinel](https://github.com/gibsongGH/CardioSentinel)
+*First load may take ~1m on free hosting due to cold start*
 
 > ⚠️ **Disclaimer:** This project is an educational demonstration and is **not** medical advice.
 
@@ -66,20 +70,18 @@ http://localhost:8501
 
 ### Run with Streamlit
 
-'''bash  
 pip install -r requirements.txt  
 streamlit run app/streamlit_app.py  
 
 ### Run with Docker
 
-'''bash  
 docker build -t cardiosentinel .  
 docker run -p 8501:8501 cardiosentinel  
 
 ---
 
 ## Project Structure
-
+```
 artifacts/                  <- final model, model card, evaluation plots  
 app/streamlit_app.py        <- Streamlit inference UI  
 src/  
@@ -91,7 +93,7 @@ src/
   train/finalize_model.py   <- Phase 2 final model packaging  
   infer/predict.py          <- Phase 3 inference logic  
   utils/                    <- seeding and MLflow helpers  
-
+```
 ---
 
 ## Data
