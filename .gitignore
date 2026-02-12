@@ -17,6 +17,7 @@ build/
 
 # Local datasets
 data/
+!data/README.md
 
 # Experiments & outputs
 mlruns/
